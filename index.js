@@ -39,13 +39,27 @@ async function run() {
 
             const cursor = foodCollection.find();
 
-            const result = await cursor.skip(1).limit(6).sort({food_quantity:-1}).toArray(); // skipping the first element because it is null in client ui
-        
+            const result = await cursor.skip(1).limit(6).sort({ food_quantity: -1 }).toArray(); // skipping the first element because it is null in client ui
+
             res.send(result);
 
         })
 
-       
+        //showing all available foods 
+
+        app.get('/available-foods', async (req, res) => {
+            // finding document which food_status field is "available"
+
+            const cursor = foodCollection.find({ food_status: "available" }).sort({ expired_datetime: 1 });
+
+            // skipping the first element because it is null in client ui
+            
+            const result = await cursor.toArray();
+
+            res.send(result);
+        })
+
+
 
     } finally {
 
