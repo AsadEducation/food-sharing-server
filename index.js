@@ -28,15 +28,24 @@ async function run() {
 
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
+        //created food collection and food database 
 
+        const foodDB = client.db('FoodDB');
+        const foodCollection = foodDB.collection('Food-Collection');
 
-        const userCollection = client.db('coffeeDB').collection('users');
+        //showing featured foods from food collection.
 
-        app.get('/users', async (req, res) => {
-            const cursor = userCollection.find();
-            const result = await cursor.toArray();
+        app.get('/featured-food', async (req, res) => {
+
+            const cursor = foodCollection.find();
+
+            const result = await cursor.skip(1).limit(6).sort({food_quantity:-1}).toArray(); // skipping the first element because it is null in client ui
+        
             res.send(result);
+
         })
+
+       
 
     } finally {
 
