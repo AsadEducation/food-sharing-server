@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
 app.use(cors());
@@ -53,11 +53,24 @@ async function run() {
             const cursor = foodCollection.find({ food_status: "available" }).sort({ expired_datetime: 1 });
 
             // skipping the first element because it is null in client ui
-            
+
             const result = await cursor.toArray();
 
             res.send(result);
         })
+
+
+        //api for single food details based on id
+
+        app.get('/food-details/:id',async(req,res)=>{
+            const id = req.params.id
+            const query = { _id: new ObjectId(id)};
+
+            const result = await foodCollection.findOne(query);
+            // console.log(result);
+            res.send(result);
+        })
+
 
 
 
