@@ -62,13 +62,26 @@ async function run() {
 
         //api for single food details based on id
 
-        app.get('/food-details/:id',async(req,res)=>{
+        app.get('/food-details/:id', async (req, res) => {
             const id = req.params.id
-            const query = { _id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
 
             const result = await foodCollection.findOne(query);
             // console.log(result);
             res.send(result);
+        })
+
+
+        //api for deleting the requested food from foodCollection
+
+        app.delete('/available-foods/:id', async (req, res) => {
+            const id = req.params.id;
+
+            const query = {_id: new ObjectId(id)}
+            const result = await foodCollection.deleteOne(query);
+
+            res.send(result);
+            
         })
 
 
