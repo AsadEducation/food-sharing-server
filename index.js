@@ -74,6 +74,35 @@ async function run() {
             res.send(result);
         })
 
+        //api for updating additional notes in food details
+
+        app.put('/food-details/:id', async (req, res) => {
+
+            const id = req.params.id;
+
+            const inputValue = req.body.value;
+
+            // console.log(inputValue);
+
+            const filter = { _id: new ObjectId(id) };
+
+            const options = { upsert: true };
+
+            const updateDoc = {
+                $set: {
+                    additional_notes:inputValue,
+                },
+            };
+
+            const result = await foodCollection.updateOne(filter,updateDoc,options)
+
+            og(result);
+
+            res.send(result);
+
+
+        })
+
         //api for deleting the requested food from foodCollection
 
         app.delete('/available-foods/:id', async (req, res) => {
@@ -98,6 +127,7 @@ async function run() {
             res.send(result);
 
         })
+
 
 
 
