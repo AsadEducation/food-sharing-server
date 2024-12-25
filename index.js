@@ -33,6 +33,10 @@ async function run() {
         const foodDB = client.db('FoodDB');
         const foodCollection = foodDB.collection('Food-Collection');
 
+        //creating requested food collection in food database;
+
+        const requestedFoodCollection = foodDB.collection('Requested-Food-Collection');
+
         //showing featured foods from food collection.
 
         app.get('/featured-food', async (req, res) => {
@@ -59,7 +63,6 @@ async function run() {
             res.send(result);
         })
 
-
         //api for single food details based on id
 
         app.get('/food-details/:id', async (req, res) => {
@@ -71,17 +74,29 @@ async function run() {
             res.send(result);
         })
 
-
         //api for deleting the requested food from foodCollection
 
         app.delete('/available-foods/:id', async (req, res) => {
             const id = req.params.id;
 
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await foodCollection.deleteOne(query);
 
             res.send(result);
-            
+
+        })
+
+        //requested food collection api 
+
+        app.post('/requested-food', async (req, res) => {
+            const requestedFood = req.body;
+
+            // console.log(requestedFood);
+
+            const result = await requestedFoodCollection.insertOne(requestedFood);
+
+            res.send(result);
+
         })
 
 
