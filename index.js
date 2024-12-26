@@ -74,7 +74,37 @@ async function run() {
 
         const requestedFoodCollection = foodDB.collection('Requested-Food-Collection');
 
-        //showing featured foods from food collection.
+
+        //auth and jwt related endpoint
+
+        app.post('/jwt', async (req, res) => {
+
+            const user = req.body;
+
+            // console.log(user);
+
+            const token = jwt.sign(user, process.env.JWT_SECRET, {
+                expiresIn: '3h'
+            })
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: false,
+            })
+
+            res.send({ success: true })
+
+        })
+
+        app.post('/logout', async (req, res) => {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: false,
+            })
+            res.send({ success: 'cleared cookie' });
+        })
+
+        //api for showing featured foods from food collection.
 
         app.get('/featured-food', async (req, res) => {
 
@@ -86,7 +116,7 @@ async function run() {
 
         })
 
-        //showing all available foods 
+        //api showing all available foods 
 
         app.get('/available-foods', async (req, res) => {
             // finding document which food_status field is "available"
