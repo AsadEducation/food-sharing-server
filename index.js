@@ -1,13 +1,50 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser')
 const port = process.env.PORT || 5000;
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
-app.use(cors());
+app.use(cors({
+
+    origin: [
+        'http://localhost:5173',
+        'https://food-sharing-32.web.app',
+
+    ],
+
+    credentials: true
+
+}));
 app.use(express.json());
+
+
+//custom middleware to verify token 
+
+
+const verifyToken = (req, res, next) => {
+    console.log('inside verify token');
+    // console.log('logging cookie from custom middleware',req.cookies);
+
+    const token = req.cookies;
+    if (!token) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+
+        if (err) {
+            return res.status(401).send({ message: 'unauthorized access' })
+        }
+
+        next();
+
+    })
+
+}
 
 
 
@@ -67,7 +104,7 @@ async function run() {
 
         //api for single food details based on id
 
-        app.get('/food-details/:id', async (req, res) => {
+        app.get('/food-details/:id', verifyToken, async (req, res) => {
             const id = req.params.id
             const query = { _id: new ObjectId(id) };
 
@@ -78,7 +115,7 @@ async function run() {
 
         //api for showing a specific users added food
 
-        app.get('/added-food', async (req, res) => {
+        app.get('/added-food', verifyToken, async (req, res) => {
 
 
             const email = req.query.email;
@@ -153,7 +190,7 @@ async function run() {
                 $set: updatedFood
             }
 
-            const result = await foodCollection.updateOne(filter, updateDoc,options);
+            const result = await foodCollection.updateOne(filter, updateDoc, options);
 
             res.send(result);
 
@@ -186,7 +223,7 @@ async function run() {
 
         //api for getting all food request for logged in user
 
-        app.get('/requested-food/:email', async (req, res) => {
+        app.get('/requested-food/:email', verifyToken, async (req, res) => {
 
             const email = req.params.email;
 
