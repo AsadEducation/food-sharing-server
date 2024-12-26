@@ -54,7 +54,9 @@ async function run() {
         app.get('/available-foods', async (req, res) => {
             // finding document which food_status field is "available"
 
-            const cursor = foodCollection.find({ food_status: "available" }).sort({ expired_datetime: 1 });
+            const available = "available".toLowerCase();
+
+            const cursor = foodCollection.find({ food_status: available }).sort({ expired_datetime: 1 });
 
             // skipping the first element because it is null in client ui
 
@@ -74,6 +76,40 @@ async function run() {
             res.send(result);
         })
 
+        //api for showing a specific users added food
+
+        app.get('/added-food', async (req, res) => {
+
+
+            const email = req.query.email;
+
+            if (!email) {
+                res.send({ message: 'Please Provide An Email First' })
+            }
+
+            // console.log(email);
+
+            const query = { food_donator_email: email };
+
+            const result = await foodCollection.find(query).toArray();
+
+            res.send(result);
+        })
+
+
+        //api for adding new foods from form 
+
+        app.post('/add-food', async (req, res) => {
+            // console.log(req.body)
+
+            const addedFood = req.body;
+
+            const result = await foodCollection.insertOne(addedFood);
+
+            res.send(result);
+
+        })
+
         //api for updating additional notes in food details
 
         app.put('/food-details/:id', async (req, res) => {
@@ -90,16 +126,36 @@ async function run() {
 
             const updateDoc = {
                 $set: {
-                    additional_notes:inputValue,
+                    additional_notes: inputValue,
                 },
             };
 
-            const result = await foodCollection.updateOne(filter,updateDoc,options)
-
-            og(result);
+            const result = await foodCollection.updateOne(filter, updateDoc, options)
 
             res.send(result);
 
+
+        })
+
+        //api for updating added food by a specific user
+
+        app.put(`/add-food/:id`, async (req, res) => {
+
+            const id = req.params.id;
+            const updatedFood = req.body;
+
+            const filter = { _id: new ObjectId(id) };
+
+            const options = { upsert: true };
+
+            const updateDoc = {
+
+                $set: updatedFood
+            }
+
+            const result = await foodCollection.updateOne(filter, updateDoc,options);
+
+            res.send(result);
 
         })
 
@@ -115,7 +171,40 @@ async function run() {
 
         })
 
-        //requested food collection api 
+        //api for deleting added food from manage my foods
+
+        app.delete('/my-added-food/:id', async (req, res) => {
+
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+
+            const result = await foodCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // requested food collection api 
+
+        //api for getting all food request for logged in user
+
+        app.get('/requested-food/:email', async (req, res) => {
+
+            const email = req.params.email;
+
+            if (!email) {
+
+                res.send({ message: 'Please Provide an Email First' })
+            }
+
+            const query = { food_requestor_email: email }
+
+            const result = await requestedFoodCollection.find(query).toArray();
+
+            res.send(result);
+
+        })
+
+
+        //api for adding a single requested food in the requested food collection
 
         app.post('/requested-food', async (req, res) => {
             const requestedFood = req.body;
