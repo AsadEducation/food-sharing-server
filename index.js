@@ -13,6 +13,7 @@ app.use(cors({
     origin: [
         'http://localhost:5173',
         'https://food-sharing-32.web.app',
+        'https://food-sharing-server-bay.vercel.app',
 
     ],
 
